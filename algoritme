@@ -1,0 +1,100 @@
+import tkinter as tk
+from tkinter import messagebox
+
+products = []
+for i in range(1, 101):
+    name = "Товар " + str(i)
+    price = (i * 10) % 300 + 50
+    products.append({"name": name, "price": price})
+
+def showProducts(product_list):
+    listbox.delete(0, tk.END) 
+    for product in product_list:
+        text = product["name"] + " - " + str(product["price"]) + " руб."
+        listbox.insert(tk.END, text)
+
+def filters():
+    searchText = entrySearch.get().lower()
+    priceText = entryPrice.get()
+    sortOption = sortVar.get()
+
+    filtered = []
+    for product in products:
+        if searchText in product["name"].lower():
+            filtered.append(product)
+
+    if priceText != "":
+        if priceText.isdigit():
+            priceValue = int(priceText)
+            filteredPrice = []
+            for product in filtered:
+                if product["price"] == priceValue:
+                    filteredPrice.append(product)
+            filtered = filteredPrice
+        else:
+            messagebox.showerror("Ошибка", "Цена должна быть числом")
+            return
+    filtered = bubbleSort(filtered, sortOption)
+    showProducts(filtered)
+
+def bubbleSort(products, sortOption):
+    n = len(products)
+    sortedProducts = products[:]
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            priceJ = sortedProducts[j]["price"]
+            priceJ1 = sortedProducts[j + 1]["price"]
+            if sortOption == "asc":
+                if priceJ > priceJ1:
+                    sortedProducts[j], sortedProducts[j + 1] = sortedProducts[j + 1], sortedProducts[j]
+            elif sortOption == "desc":
+                if priceJ < priceJ1:
+                    sortedProducts[j], sortedProducts[j + 1] = sortedProducts[j + 1], sortedProducts[j]
+            else:
+        
+                return products
+
+    return sortedProducts
+
+root = tk.Tk()
+root.title("Поиск и фильтрация товаров")
+root.geometry("400x500")
+
+labelForSearch = tk.Label(root, text="Поиск по имени:")
+labelForSearch.pack(pady=5)
+entrySearch = tk.Entry(root, width=30)
+entrySearch.pack()
+
+labelForPrice = tk.Label(root, text="Фильтр по цене (точное значение):")
+labelForPrice.pack(pady=5)
+entryPrice = tk.Entry(root, width=30)
+entryPrice.pack()
+
+labelForSort = tk.Label(root, text="Сортировка по цене:")
+labelForSort.pack(pady=5)
+
+sortVar = tk.StringVar()
+sortVar.set("none") 
+
+frameSort = tk.Frame(root)
+frameSort.pack()
+
+rbNone = tk.Radiobutton(frameSort, text="Без сортировки", variable=sortVar, value="none")
+rbNone.pack(side=tk.LEFT, padx=5)
+
+rbAsc = tk.Radiobutton(frameSort, text="По возрастанию", variable=sortVar, value="asc")
+rbAsc.pack(side=tk.LEFT, padx=5)
+
+rbDesc = tk.Radiobutton(frameSort, text="По убыванию", variable=sortVar, value="desc")
+rbDesc.pack(side=tk.LEFT, padx=5)
+
+btnApply = tk.Button(root, text="Применить", command=filters)
+btnApply.pack(pady=10)
+
+listbox = tk.Listbox(root, width=50, height=20)
+listbox.pack(pady=10)
+
+showProducts(products)
+
+root.mainloop()
+
